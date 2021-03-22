@@ -1,13 +1,11 @@
 <html>
 	<head>
 		<script type="text/javascript" src="main.js"></script>
-		<!--script type="text/javascript" src="utf8.js"></script-->
+		<script type="text/javascript" src="data-qoala-pcs-manager.js"></script>
 
-		<!-- https://github.com/FlatFilers/csvjson-csv2json -->
 		<script type="text/javascript" src="libs/csv2json.js"></script>
 		<script type="text/javascript" src="libs/json2csv.js"></script>
 		<script type="text/javascript" src="libs/FileSaver.js"></script>
-
 	</head>
 
 	<body>
@@ -26,11 +24,7 @@
 			<div id="data-qoala-json"></div>
 		</div>
 
-		<br/>
-
-		<button disabled onclick="processDataQOALA();">Process QOALA data</button>
-
-		
+		<br/>		
 
 		<h1>Step 2: import PCS data</h1>
 
@@ -38,10 +32,10 @@
 		<input id="file-input-pcs" type="file" multiple>
 
 		<h1>Step 3: merge data</h1>
-		<button disabled onclick="mergeDataSources();">Merge Data Sources</button>
+		<button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button>
 
 		<h1>Step 4: export data</h1>
-		<button disabled onclick="exportResultCSV();">Export CSV</button>
+		<button id="button-export" disabled onclick="exportResultCSV();">Export CSV</button>
 
 	</body>
 </html>
