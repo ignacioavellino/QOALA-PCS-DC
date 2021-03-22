@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<script type="text/javascript" src="main.js"></script>
+		<!--script type="text/javascript" src="utf8.js"></script-->
+
+		<!-- https://github.com/FlatFilers/csvjson-csv2json -->
+		<script type="text/javascript" src="libs/csv2json.js"></script>
+		<script type="text/javascript" src="libs/json2csv.js"></script>
+		<script type="text/javascript" src="libs/FileSaver.js"></script>
+
+	</head>
+
+	<body>
+		<h1>Step 1: import QOALA data</h1>
+		<p>Either fetch from QOALA server, or load a local JSON from your computer</p>
+		<button onclick="loadServerDataQOALA();">Fetch QOALA JSON</button>
+
+		<p>Load local QOALA JSON</p>
+		<input id="file-input-qoala" type="file">
+
+		<br/>
+		<br/>
+
+		<div id="div-data">
+			<div id="data-qoala-version"></div>
+			<div id="data-qoala-json"></div>
+		</div>
+
+		<br/>
+
+		<button disabled onclick="processDataQOALA();">Process QOALA data</button>
+
+		
+
+		<h1>Step 2: import PCS data</h1>
+
+		<p>Select all Final Submission CSV Files from PCS</p>
+		<input id="file-input-pcs" type="file" multiple>
+
+		<h1>Step 3: merge data</h1>
+		<button disabled onclick="mergeDataSources();">Merge Data Sources</button>
+
+		<h1>Step 4: export data</h1>
+		<button disabled onclick="exportResultCSV();">Export CSV</button>
+
+	</body>
+</html>
