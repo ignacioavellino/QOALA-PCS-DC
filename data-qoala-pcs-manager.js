@@ -147,22 +147,32 @@ class DQP {
       };
 
       // Process dates
-      try {
+      if (toPush.sessionOneStart) {
         toPush.sessionOneStart = new Date (toPush.sessionOneStart);
-        toPush.sessionOneEnd   = new Date (toPush.sessionOneEnd);
-        toPush.sessionTwoStart = new Date (toPush.sessionTwoStart);
-        toPush.sessionTwoEnd   = new Date (toPush.sessionTwoEnd);
-
         toPush.sessionOneStart = toPush.sessionOneStart.toLocaleString('en-US', { timeZone: 'UTC' });
+      } else {
+        toPush.sessionOneStart = "";
+      }
+      if (toPush.sessionOneEnd) {
+        toPush.sessionOneEnd   = new Date (toPush.sessionOneEnd);
         toPush.sessionOneEnd   = toPush.sessionOneEnd.toLocaleString('en-US', { timeZone: 'UTC' });
+      } else {
+        toPush.sessionOneEnd = "";
+      }
+      if (toPush.sessionTwoStart) {
+        toPush.sessionTwoStart = new Date (toPush.sessionTwoStart);
         toPush.sessionTwoStart = toPush.sessionTwoStart.toLocaleString('en-US', { timeZone: 'UTC' });
+      } else {
+        toPush.sessionTwoStart = "";
+      }
+      if (toPush.sessionTwoEnd) {
+        toPush.sessionTwoEnd   = new Date (toPush.sessionTwoEnd);
         toPush.sessionTwoEnd   = toPush.sessionTwoEnd.toLocaleString('en-US', { timeZone: 'UTC' });
-
-      } catch(error) {
-        // Date is empty probably
+      } else {
+        toPush.sessionTwoEnd = "";
       }
 
-      this.programs.toExport.push(toPush );
+      this.programs.toExport.push(toPush);
     }
   }
 
@@ -176,15 +186,14 @@ class DQP {
     var pCSContent = this.programs.pcs[qOALAEntry.typeId];
 
     for( var idxPCSContent in  pCSContent ) {
-      //Debug
-      /*
-      if (qOALAEntry.title.indexOf("A Network Analysis") > -1) {
-        if (pCSContent[idxPCSContent].Title.indexOf("A Network Analysis") > -1) {
+      //Debug by title
+      /*if (qOALAEntry.title.indexOf("Does Clickbait") > -1) {
+        if (pCSContent[idxPCSContent].Title.indexOf("Does Clickbait") > -1) {
           //debugger;
           console.log("here");
+          debugger;
         }
-      }
-      */
+      }*/
 
       // Try first to match by DOI
       if (pCSContent[idxPCSContent].DOI && qOALAEntry.doi) {

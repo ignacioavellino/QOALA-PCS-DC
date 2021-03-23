@@ -18,8 +18,8 @@ function loadServerDataQOALA(callback) {
 
     console.log("Fetching JSON");
 
-	var xhttpVersion = new XMLHttpRequest();
-    xhttpVersion.onreadystatechange = function() {
+	var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
          if (this.readyState == 4 && this.status == 200) {
          	//console.log(this.responseText);
          	console.log("Done fetching data");
@@ -35,9 +35,9 @@ function loadServerDataQOALA(callback) {
             }
          }
     };
-    xhttpVersion.open("GET", "https://files.sigchi.org/conference/program/CHI/2021", true);
-    xhttpVersion.setRequestHeader("Content-type", "application/json");
-    xhttpVersion.send();
+    xhttp.open("GET", "https://files.sigchi.org/conference/program/CHI/2021", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
 }
 
 function loadFileDataQOALA() {
@@ -128,6 +128,6 @@ function exportResultCSV() {
 	var blob = new Blob([stringToExport], {
 	    type: "text/plain;charset=utf-8;",
 	});
-	saveAs(blob, "result.csv");
+	saveAs(blob, "result_v" + dqp.programs.qoala.dataVersion + ".csv");
 }
 
