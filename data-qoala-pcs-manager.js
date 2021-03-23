@@ -10,6 +10,8 @@ class DQP {
       toExport : []
     };
 
+    this.pCSIncompleteTitleBlurb = "[NO FINAL TITLE PROVIDED. ORIGINAL TITLE: ";
+
   }
 
   setQOALAProgram(programJSON) {
@@ -178,22 +180,18 @@ class DQP {
 
   _matchEntryQOALAWithPCS(qOALAEntry) {
     // We had previously loaded PCS files with name equal to the QOALA TypeId
-
-    if (qOALAEntry.title.indexOf("SIGCHI Lifetime Research Award Talk: The Future Is Not") > -1) {
-      return undefined;
-    }
-
     var pCSContent = this.programs.pcs[qOALAEntry.typeId];
 
     for( var idxPCSContent in  pCSContent ) {
       //Debug by title
-      /*if (qOALAEntry.title.indexOf("Does Clickbait") > -1) {
-        if (pCSContent[idxPCSContent].Title.indexOf("Does Clickbait") > -1) {
-          //debugger;
+      /*
+      if (qOALAEntry.title.indexOf("SIGCHI Lifetime Research Award Talk: The Future Is Not") > -1) {
+        if (pCSContent[idxPCSContent].Title.indexOf("SIGCHI Lifetime Research Award Talk: The Future Is Not") > -1) {
           console.log("here");
           debugger;
         }
-      }*/
+      }
+      */
 
       // Try first to match by DOI
       if (pCSContent[idxPCSContent].DOI && qOALAEntry.doi) {
@@ -202,7 +200,16 @@ class DQP {
         }
       } else {
         // Then try title
-        if (pCSContent[idxPCSContent].Title.trim() == qOALAEntry.title.trim()) {
+        var titlePCS = pCSContent[idxPCSContent].Title.trim();
+        var titleQOALA = qOALAEntry.title.trim();
+
+        // Ignore incomplete PCS message
+        if (titlePCS.indexOf(this.pCSIncompleteTitleBlurb) > -1) {
+          titlePCS = titlePCS.slice(this.pCSIncompleteTitleBlurb.length, titlePCS.length - 1);
+        }
+
+        
+        if (titlePCS.trim() == titleQOALA.trim()) {
           return idxPCSContent;
         }
       }

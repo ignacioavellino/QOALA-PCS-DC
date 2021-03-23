@@ -108,13 +108,12 @@ function mergeDataSources() {
 	console.log("Data source merge start. Check following lines for content that does not match");
 	// For now, ignore 
     // 11302 Invited Talk
-    // 11765 SIGCHI Awars
-    // 11766 SIGCHI Lifetime Award
     // 11768 "Keynotes_30min"
     // 11769 "Keynotes_15min"
     // 11306 Plenary
     // 11764 Break
-	dqp.mergeQOALAWithPCS([11302,11765,11766,11768,11769,11306,11764]);
+    // [11302,11765,11766,11768,11769,11306,11764]
+	dqp.mergeQOALAWithPCS([11302, 11768, 11769, 11306, 11764]);
 
 	console.log("Data source merge end");
 
