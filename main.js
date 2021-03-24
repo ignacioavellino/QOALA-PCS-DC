@@ -112,8 +112,11 @@ function mergeDataSources() {
     // 11769 "Keynotes_15min"
     // 11306 Plenary
     // 11764 Break
-    // [11302,11765,11766,11768,11769,11306,11764]
-	dqp.mergeQOALAWithPCS([11302, 11768, 11769, 11306, 11764]);
+    // 11771 BREAK (5min)
+    // 11155 BREAK (10min)
+    // 11772 BREAK (20min)
+    // 11767 Keynotes
+	dqp.mergeQOALAWithPCS([11302, 11768, 11769, 11306, 11764, 11771, 11155, 11772, 11767]);
 
 	console.log("Data source merge end");
 

@@ -11,6 +11,7 @@ class DQP {
     };
 
     this.pCSIncompleteTitleBlurb = "[NO FINAL TITLE PROVIDED. ORIGINAL TITLE: ";
+    this.pCSIncompleteTitleRegex = /(\[NO FINAL TITLE PROVIDED. ORIGINAL TITLE: )(.*)(\])/;
 
   }
 
@@ -20,22 +21,9 @@ class DQP {
   }
 
   processDataQOALA(callbackSuccess) {
-    var tracks = [];
-    var contentTypes = [];
-
     // ********************
     // 1. Create the Final program object
     // ********************
-
-    // Make a track key:names object, to avoid iterating all the time
-    for (var i = 0; i < this.programs.qoala.tracks.length; i++) {
-      tracks[this.programs.qoala.tracks[i].id] = this.programs.qoala.tracks[i].name;
-    }
-
-    // Same for content Type
-    for (var i = 0; i < this.programs.qoala.contentTypes.length; i++) {
-      contentTypes[this.programs.qoala.contentTypes[i].id] = this.programs.qoala.contentTypes[i].name;
-    }
 
     // Iterate over all content
     for (var c = 0; c < this.programs.qoala.contents.length; c++) {
@@ -46,11 +34,11 @@ class DQP {
         title               : this.programs.qoala.contents[c].title,
         doi                 : this.programs.qoala.contents[c].doi,
         trackId             : this.programs.qoala.contents[c].trackId,
+        abstract            : this.programs.qoala.contents[c].abstract,
+        videos              : this.programs.qoala.contents[c].videos,
+        authors             : this.programs.qoala.contents[c].authors,
         typeId              : this.programs.qoala.contents[c].typeId,
-        //authors           : this.programs.qoala.contents[c].authors,
-        // Fetch track data
-        trackName           : tracks[this.programs.qoala.contents[c].trackId],
-        typeName            : contentTypes[this.programs.qoala.contents[c].typeId],
+        
         sessionOneStart     : undefined,
         sessionOneEnd       : undefined,
         sessionTwoStart     : undefined,
@@ -115,8 +103,19 @@ class DQP {
   }
 
   mergeQOALAWithPCS(contentTypesToIgnore) {
-    // Clean
+    // Clean final export
     this.programs.toExport = [];
+
+    // Dictionaries (key:names) for faster search, avoid iterating each time we need one
+    var tracks = [];
+    var contentTypes = [];
+    /*
+    for (var i = 0; i < this.programs.qoala.tracks.length; i++) {
+      tracks[this.programs.qoala.tracks[i].id] = this.programs.qoala.tracks[i].name;
+    }*/
+    for (var i = 0; i < this.programs.qoala.contentTypes.length; i++) {
+      contentTypes[this.programs.qoala.contentTypes[i].id] = this.programs.qoala.contentTypes[i].name;
+    }
 
     // For each data in the final array
     for( var idxProgFinal in this.programs.final ) {
@@ -138,7 +137,7 @@ class DQP {
 
       // Prepare array to export
       var toPush = {
-        type              : this.programs.final[idxProgFinal].typeName,
+        type              : contentTypes[this.programs.final[idxProgFinal].typeId],
         title             : this.programs.final[idxProgFinal].title,
         sessionOneStart   : this.programs.final[idxProgFinal].sessionOneStart,
         sessionOneEnd     : this.programs.final[idxProgFinal].sessionOneEnd,
@@ -205,7 +204,8 @@ class DQP {
 
         // Ignore incomplete PCS message
         if (titlePCS.indexOf(this.pCSIncompleteTitleBlurb) > -1) {
-          titlePCS = titlePCS.slice(this.pCSIncompleteTitleBlurb.length, titlePCS.length - 1);
+          //titlePCS = titlePCS.slice(this.pCSIncompleteTitleBlurb.length, titlePCS.length - 1);
+          titlePCS = this.pCSIncompleteTitleRegex.exec(titlePCS)[2];
         }
 
         
