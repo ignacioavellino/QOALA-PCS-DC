@@ -1,31 +1,52 @@
 <html>
 	<head>
+		<meta charset="utf-8">
 		<script type="text/javascript" src="main.js"></script>
 		<script type="text/javascript" src="data-qoala-pcs-manager.js"></script>
 
 		<script type="text/javascript" src="libs/csv2json.js"></script>
 		<script type="text/javascript" src="libs/json2csv.js"></script>
 		<script type="text/javascript" src="libs/FileSaver.js"></script>
+
+		
 		<title>Data merge for CHI</title>
+		<style>
+			table {
+			  font-family: arial, sans-serif;
+			  border-collapse: collapse;
+			  /*width: 100%;*/
+			}
+
+			td, th {
+			  border: 1px solid #dddddd;
+			  text-align: left;
+			  padding: 8px;
+			}
+
+			tr:nth-child(even) {
+			  background-color: #dddddd;
+			}
+		</style>
 	</head>
 
 	<body>
 		<h1>Step 1: import QOALA data</h1>
-		<p>Either fetch from QOALA server, or load a local JSON from your computer</p>
-		<button onclick="loadServerDataQOALA();">Fetch QOALA JSON</button>
-
-		<p>Load local QOALA JSON</p>
-		<input id="file-input-qoala" type="file">
-
-		<br/>
-		<br/>
-
-		<div id="div-data">
-			<div id="data-qoala-version"></div>
-			<div id="data-qoala-json"></div>
-		</div>
-
-		<br/>		
+		<table border=1>
+			<tr>
+				<th>Fetch from QOALA server</th>
+				<th>Load local JSON</th>
+				<th>Result</th>
+			</tr>
+			<tr>
+				<td><button onclick="loadServerDataQOALA();">Fetch QOALA JSON</button></td>
+				<td><input id="file-input-qoala" type="file"></td>
+				<td id="div-data">
+					<div id="data-qoala-version"></div>
+					<div id="data-qoala-json"></div>
+				</td>
+			</tr>
+		</table>
+		
 
 		<h1>Step 2: import PCS data</h1>
 
@@ -33,10 +54,43 @@
 		<input id="file-input-pcs" type="file" multiple>
 
 		<h1>Step 3: merge data</h1>
-		<button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button>
+		<table border=1>
+			<tr>
+				<th>Merge data</th>
+				<th>Presenters</th>
+				<th>Session Chairs</th>
+			</tr>
+			<tr>
+				<td><button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button></td>
+				<td>Match for review: <button id="button-match-presenting" disabled onclick="matchPresentingAuthors();">Match Presenting Authors</button></td>
+				<td>Load file and match for review: <input id="file-input-session-chairs" type="file"> </td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>Import matched after review: <input id="file-input-presenting-authors" disabled type="file"></td>
+				<td>Then, use QOALA to match sessions - chairs. They will then show in the QOALA JSON</td>
+			</tr>
+		</table>
 
 		<h1>Step 4: export data</h1>
-		<button id="button-export" disabled onclick="exportResultCSV();">Export CSV</button>
+		<table border=1>
+			<tr>
+				<th>EE</th>
+				<th>DC</th>
+				<th></th>
+			</tr>
+			<tr>
+				<td><button id="button-export" disabled onclick="exportResultCSV();">Export CSV for EE</button></td>
+				<td>Import files: days.csv, <input id="file-input-dc" multiple type="file"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+		
 
 	</body>
 </html>
