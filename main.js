@@ -20,6 +20,11 @@ window.addEventListener("load", function() {
 	const inputFileDC = document.getElementById("file-input-dc");
 	inputFileDC.addEventListener("change", loadFileDataDC, false);
 
+	const inputFilePeopleQOALA = document.getElementById("file-input-people-extra");
+	inputFilePeopleQOALA.addEventListener("change", loadFilePeopleQOALA, false);
+
+	
+
 	dqp = new DQP();
 
 	// Load dev QOALA data
@@ -125,17 +130,20 @@ function loadFileDataPCS() {
 	    // See for encodings: https://github.com/whatwg/encoding/blob/main/encodings.json
 	}
 
-	var button = document.getElementById("button-merge");
-	button.removeAttribute("disabled");
+	var buttonA = document.getElementById("button-merge");
+	buttonA.removeAttribute("disabled");
 
-	var button = document.getElementById("button-match-presenting");
-	button.removeAttribute("disabled");
+	var buttonB = document.getElementById("button-match-presenting");
+	buttonB.removeAttribute("disabled");
 
-	var button = document.getElementById("file-input-session-chairs");
-	button.removeAttribute("disabled");
+	var buttonC = document.getElementById("file-input-session-chairs");
+	buttonC.removeAttribute("disabled");
 	
-	var button = document.getElementById("file-input-presenting-authors");
-	button.removeAttribute("disabled");
+	var buttonD = document.getElementById("file-input-presenting-authors");
+	buttonD.removeAttribute("disabled");
+
+	var buttonE = document.getElementById("file-input-people-extra");
+	buttonE.removeAttribute("disabled");
 	
 }
 
@@ -239,8 +247,6 @@ function loadFileSessionCharis() {
     reader.readAsText(files[0]);
 }
 
-
-
 function loadFileDataDC() {
 	console.log("Loading DC Data");
 	// For dev purposes, don't do a file read but have the data ready here as hardcoded JSON
@@ -292,6 +298,34 @@ function loadFileDataDC() {
 
 }
 
+function loadFilePeopleQOALA() {
+	console.log("Loading Extra QOALA People Information");
+
+	const files = document.getElementById("file-input-people-extra").files;
+
+	var reader = new FileReader();
+	// Keep ref to name
+	reader.fileName = files[0].name;
+
+    reader.onload = function(event) {
+        console.log("Done reading file", event.target.fileName);
+        try {
+        	var jsonPeopleExtraInfo = CSVJSON.csv2json(event.target.result, {parseNumbers: true});
+        	
+        	console.log("Loaded People extra information Content entries:", jsonPeopleExtraInfo.length);
+
+        	// Add info to people
+        	dqp.processPeopleExtraInformation( jsonPeopleExtraInfo, ["email"] );
+
+        	console.log("Finished processing extra info people");
+	    	
+	    } catch (error) {
+	    	console.error(error);
+	    }
+    };
+    reader.readAsText(files[0]);
+}
+
 function exportResultCSV() {
 	dqp.exportFinalProgram();
 	var stringToExport = CSVJSON.json2csv(dqp.programs.toExport);
@@ -304,7 +338,7 @@ function exportResultCSV() {
 
 
 let dataDC = {
-	days 		: JSON.parse('[{"ID":5,"Date":"07 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":6,"Date":"08 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":7,"Date":"09 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":8,"Date":"10 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":9,"Date":"11 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":10,"Date":"12 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":11,"Date":"13 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":12,"Date":"14 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":13,"Date":"15 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""},{"ID":14,"Date":"16 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""}]'),
+	days 		: [{"ID":5,"Date":"07 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":6,"Date":"08 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":7,"Date":"09 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":8,"Date":"10 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":9,"Date":"11 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":10,"Date":"12 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":11,"Date":"13 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":12,"Date":"14 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":13,"Date":"15 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""},{"ID":14,"Date":"16 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""}],
 	speakerType : [{id: "Keynote Speaker", event_ids : 1, external_id : 1}, {id: "Author", event_ids : 1, external_id : 2}],
 	themes 		: [{id: 1, name: "CHI", icon : "", active : "", focus : "",summary : "", hero : "", vertical_tile : "", short_name : "", description : "", color : "", external_id : ""}]
 };

@@ -57,18 +57,23 @@
 		<table border=1>
 			<tr>
 				<th>Merge data</th>
-				<th>Presenters</th>
+				<th>People</th>
 				<th>Session Chairs</th>
 			</tr>
 			<tr>
 				<td><button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button></td>
-				<td>Match for review: <button id="button-match-presenting" disabled onclick="matchPresentingAuthors();">Match Presenting Authors</button></td>
+				<td>Match PCS Presenter with QOALA People for review: <button id="button-match-presenting" disabled onclick="matchPresentingAuthors();">Match Presentiers-People</button></td>
 				<td>Load file and match for review: <input id="file-input-session-chairs" type="file"> </td>
 			</tr>
 			<tr>
 				<td></td>
-				<td>Import matched after review: <input id="file-input-presenting-authors" disabled type="file"></td>
+				<td>Import PCS Presenter - QOALA People matched after review: <input id="file-input-presenting-authors" disabled type="file"></td>
 				<td>Then, use QOALA to match sessions - chairs. They will then show in the QOALA JSON</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>Import People extra info: <input id="file-input-people-extra" disabled type="file"></td>
+				<td></td>
 			</tr>
 		</table>
 

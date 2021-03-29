@@ -313,6 +313,21 @@ class DQP {
     return {"contents" : this.presenterMatch};
   }
 
+  processPeopleExtraInformation(peopleExtraInformation, fields) {
+    // ********************
+    // 1. Iterate the Final People
+    // ********************
+    for( var idx in peopleExtraInformation ) {
+      if (!this.dictionaries.people[peopleExtraInformation[idx].exported_id]) {
+        console.log("ERROR. Unknown QOALA person when trying to add the following information to them:", peopleExtraInformation[idx]);
+      } else {
+        for( var idy in fields ) {
+          this.dictionaries.people[peopleExtraInformation[idx].exported_id][fields[idy]] = peopleExtraInformation[idx][fields[idy]];
+        }
+      }
+    }
+  }
+
   setDCData(dcData) {
     // TODO: checks
     this.programs.dc = dcData;
@@ -424,7 +439,7 @@ class DQP {
         pronoun               : "",
         first_name            : firstName,
         last_name             : person.lastName,
-        email                 : "",
+        email                 : person.email ? person.email : "",
         location              : "SEE INDIVIDUAL TALKS",
         state                 : "SEE INDIVIDUAL TALKS",
         country               : "SEE INDIVIDUAL TALKS",
@@ -460,11 +475,16 @@ class DQP {
     for (var idx in this.programs.final.contents) {
       var content = this.programs.final.contents[idx];
 
-      // Compute authors list
+      // Compute authors list AND speakers from authors
       var authors = [];
+      var speakers = [];
+      var speakersEmails = [];
       var j = 1;
       for (var idy in content.authors) {
         var personQOALA = this.dictionaries.people[ content.authors[idy].personId ];
+        if (!personQOALA) {
+          console.log("ERROR. Unknown person when trying to match speaker for content:", content);
+        }
         var fullName = personQOALA.firstName;
         if (personQOALA.middleInitial && personQOALA.middleInitial.length > 0) {
           fullName += " " + personQOALA.middleInitial;
@@ -472,36 +492,46 @@ class DQP {
         fullName += " " + personQOALA.lastName;
         var affiliation = "";
 
+        var email = personQOALA.email ? personQOALA.email : "";
+
         authors.push({
-          order         : j
+          order         : j,
           speakerId     : this.programs.dc.speakersDict[content.authors[idy].personId].id, // id to table of speaker ids
           name          : fullName,
+          email         : email,
           affiliations  : content.authors[idy].affiliations
         });
         j++
-      }
 
-      /*
-      // Compute speakers from presenters
-      var speakers = [];
-      for (var idy in content.presenters) {
-        var personQOALA = this.dictionaries.people[ content.presenters[idy].personId ];
-        if (!personQOALA) {
-          console.log("ERROR. Unknown person when trying to match speaker for content:", content);
-        }
         var speakerDCId = this.programs.dc.speakersDict[personQOALA.id].id;
         speakers.push(speakerDCId);
-
-        // Add to dictionaries, for later
+        // Add to dictionaries, for later associating the talks of a speaker
         if (!this.dictionaries.dc.talksBySpeakers[speakerDCId]) {
           this.dictionaries.dc.talksBySpeakers[speakerDCId] = [i];
         } else {
           this.dictionaries.dc.talksBySpeakers[speakerDCId].push(i);
         }
+
+        speakersEmails.push(email);
       }
-      */
-      // Compute speakers from authors
-      var speakers = [];
+      
+      // Also, compute speakers from presenters. Just in case we need it later.
+      var presenters = [];
+      for (var idy in content.presenters) {
+        var personQOALA = this.dictionaries.people[ content.presenters[idy].personId ];
+        if (!personQOALA) {
+          console.log("ERROR. Unknown person when trying to match speaker for content:", content);
+        }
+        var presentersDCId = this.programs.dc.speakersDict[personQOALA.id].id;
+        presenters.push(presentersDCId);
+
+        // Add to dictionaries, for later
+        // if (!this.dictionaries.dc.talksBySpeakers[speakerDCId]) {
+        //   this.dictionaries.dc.talksBySpeakers[speakerDCId] = [i];
+        // } else {
+        //   this.dictionaries.dc.talksBySpeakers[speakerDCId].push(i);
+        // }
+      }
 
       // Check if it has a track that should be ignored
       if ( ignores.tracks.includes(content.trackId) ) {
@@ -520,8 +550,8 @@ class DQP {
         day_id                : "SEE SESSION",
         talk_type_id          : this.programs.dc.talkTypesDict[content.trackId].id,
         duration              : this.dictionaries.contentTypes[content.typeId].duration, 
-        speaker_ids           : speakers.join(","),
-        speaker_emails        : "",
+        speaker_ids           : speakers.join(", "),
+        speaker_emails        : speakersEmails.join(", "),
         authors               : JSON.stringify(authors),
         session_ids           : "", // need to link
         theme_ids             : this.programs.dc.themes[0].id, // One theme by default
@@ -534,7 +564,8 @@ class DQP {
         eposter_url           : "",
         webcast_poster        : "",
         time                  : "SEE SESSION",
-        external_id           : content.id
+        external_id           : content.id,
+        presenters_id         : presenters.join(", ")
       };
 
       this.programs.dc.talks.push(objToPush);
@@ -560,10 +591,13 @@ class DQP {
 
       // Compute moderators (=QOALA chairs)
       var moderators = [];
+      var moderatorsEmails = [];
       for (var idy in session.chairIds) {
         var personQOALA = this.dictionaries.people[ session.chairIds[idy] ];
         var speakerDCId = this.programs.dc.speakersDict[personQOALA.id].id;
+        var speakerDCEmail = this.programs.dc.speakersDict[personQOALA.id].email;
         moderators.push(speakerDCId);
+        moderatorsEmails.push(speakerDCEmail);
       }
 
       var talks = [];
@@ -591,9 +625,9 @@ class DQP {
         time                  : dcDay.time,
         duration              : dcDay.duration,
         background_image      : "",
-        talk_ids              : talks.join(","),
-        moderators_ids        : moderators.join(","),
-        moderators_emails     : "",
+        talk_ids              : talks.join(", "),
+        moderators_ids        : moderators.join(", "),
+        moderators_emails     : moderatorsEmails.join(", "),
         venue_ids             : this.programs.dc.venuesDict[session.roomId].id,
         theme_ids             : this.programs.dc.themes[0].id, // One theme by default
         registration_required : "",
@@ -628,15 +662,15 @@ class DQP {
     // ********************
     // 8. Add talks to speakers
     // ********************
-    // TODO: This is wrong, it links to authors, but should link to presenters
-    // for (var idx in this.programs.dc.speakers) {
-    //   var speakers = this.dictionaries.dc.talksBySpeakers[ this.programs.dc.speakers[idx].id ];
-    //   if (!speakers) {
-    //     // Some people don't give talks, like co-authors
-    //   } else {
-    //     this.programs.dc.speakers[idx].talk_ids = speakers.join(", ")
-    //   }
-    // }
+    // Caveat: we link to authors, not presenters
+    for (var idx in this.programs.dc.speakers) {
+      var speakers = this.dictionaries.dc.talksBySpeakers[ this.programs.dc.speakers[idx].id ];
+      if (!speakers) {
+        // Some people don't give talks, like co-authors
+      } else {
+        this.programs.dc.speakers[idx].talk_ids = speakers.join(", ")
+      }
+    }
 
   }
 
@@ -762,7 +796,7 @@ class DQP {
       }
     }
 
-    console.log(qOALAEntry.id, ",", qOALAEntry.title);
+    console.log(qOALAEntry.id, ", ", qOALAEntry.title);
     return undefined;
   }
 
