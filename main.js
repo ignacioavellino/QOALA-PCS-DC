@@ -22,7 +22,11 @@ window.addEventListener("load", function() {
 
 	dqp = new DQP();
 
-
+	// Load dev QOALA data
+	dqp.setQOALAProgram( testData );
+	dqp.processDataQOALA(function() {
+		updateUI();
+	});
 
 });
 
@@ -114,6 +118,7 @@ function loadFileDataPCS() {
 	        if (event.target.fileLength == processedPCSFiles) {
 	        	console.log("Done with all, auto merging");
 	        	mergeDataSources();
+	        	//loadFileDataDC();
 	        }
 	    };
 	    reader.readAsText(files[i], "UTF8");
@@ -124,7 +129,7 @@ function loadFileDataPCS() {
 	button.removeAttribute("disabled");
 
 	var button = document.getElementById("button-match-presenting");
-	//button.removeAttribute("disabled");
+	button.removeAttribute("disabled");
 
 	var button = document.getElementById("file-input-session-chairs");
 	button.removeAttribute("disabled");
@@ -138,15 +143,19 @@ function mergeDataSources() {
 	console.log("Data source merge start. Check following lines for content that does not match");
 	// For now, ignore 
     // 11302 Invited Talk
-    // 11768 "Keynotes_30min"
-    // 11769 "Keynotes_15min"
+    // 11768 "Keynotes_30min" *
+    // 11769 "Keynotes_15min" *
     // 11306 Plenary
-    // 11764 Break
-    // 11771 BREAK (5min)
+    // 11764 Break *
+    // 11771 BREAK (5min) *
     // 11155 BREAK (10min)
-    // 11772 BREAK (20min)
-    // 11767 Keynotes
-	dqp.mergeQOALAWithPCS([11302, 11768, 11769, 11306, 11764, 11771, 11155, 11772, 11767]);
+    // 11772 BREAK (20min) *
+    // 11767 Keynotes *
+    // 11773 alt.chi debate
+    // 11775 SGC-Q&A
+    // 11774 SGC-intro-closing
+	//dqp.mergeQOALAWithPCS([11302, 11768, 11769, 11306, 11764, 11771, 11155, 11772, 11767, 11773, 11775, 11774]);
+	dqp.mergeQOALAWithPCS([]);
 
 	console.log("Data source merge end");
 
@@ -230,47 +239,56 @@ function loadFileSessionCharis() {
     reader.readAsText(files[0]);
 }
 
-let dataDC = {};
+
 
 function loadFileDataDC() {
-	console.log("Loading Session Chairs");
-	const files = document.getElementById("file-input-dc").files;
+	console.log("Loading DC Data");
+	// For dev purposes, don't do a file read but have the data ready here as hardcoded JSON
+	
+	// const files = document.getElementById("file-input-dc").files;
+	// for (var i = 0; i < files.length; i++) {
+	// 	var reader = new FileReader();
+	// 	// Keep ref for onload use
+	// 	reader.fileName = files[i].name;
+	// 	reader.fileLength = files.length;
 
-	for (var i = 0; i < files.length; i++) {
-		var reader = new FileReader();
-		// Keep ref for onload use
-		reader.fileName = files[i].name;
-		reader.fileLength = files.length;
+	//     reader.onload = function(event) {
+	//         console.log("Done reading file", event.target.fileName);
+	//         var json = CSVJSON.csv2json(event.target.result, {parseNumbers: true});
 
-	    reader.onload = function(event) {
-	        console.log("Done reading file", event.target.fileName);
-	        var json = CSVJSON.csv2json(event.target.result, {parseNumbers: true});
+	//         switch(event.target.fileName) {
+	//         	case "days.csv":
+	//         	dataDC.days = json;
+	//         }
 
-	        switch(event.target.fileName) {
-	        	case "days.csv":
-	        	dataDC.days = json;
-	        }
-
-	        processedDCFiles++;
+	//         processedDCFiles++;
 	        
-	        if (event.target.fileLength == processedDCFiles) {
-	        	console.log("Done with all, setting DC data");
+	//         if (event.target.fileLength == processedDCFiles) {
+	//         	console.log("Done with all, setting DC data");
+
 	        	dqp.setDCData(dataDC);
+	        	/*
 	        	dqp.processDCData({
-	        		// 11154=, 11156, 11157, 11160, 11158, 11159, 11155, 11164
-	        		tracks : [11154, 11156, 11157, 11160, 11158, 11159, 11155, 11164],
+	        		// 11154=, 11156, 11157, 11160, 11158, 11159, 11155, 11164, 11166, 11165, 11167
+	        		tracks : [11154, 11156, 11157, 11160, 11158, 11159, 11155, 11164, 11166, 11165, 11167],
 	        		// Keynotes_30min = 11768; Keynotes_15min = 11769; break5 = 11771; break20 = 11772; break10 = 11764
-	        		contentTypes 		 : [11768, 11769, 11771, 11772, 11764]
+	        		//contentTypes 		 : [11768, 11769, 11771, 11772, 11764]
+	        		
+	        		// break20 = 11772; break10 = 11764
+	        		contentTypes 		 : [11772, 11764]
+	        	});*/
+	        	dqp.processDCData({
+	        		tracks 			: [],
+	        		contentTypes 	: []
 	        	});
 
-
-	        }
-	    };
-	    reader.readAsText(files[i], "UTF8");
-	}
+	        	console.log("Finished processing DC Data");
 
 
-
+	//         }
+	//     };
+	//     reader.readAsText(files[i], "UTF8");
+	// }
 
 }
 
@@ -285,4 +303,8 @@ function exportResultCSV() {
 }
 
 
-
+let dataDC = {
+	days 		: JSON.parse('[{"ID":5,"Date":"07 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":6,"Date":"08 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":7,"Date":"09 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":8,"Date":"10 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":9,"Date":"11 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":10,"Date":"12 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":11,"Date":"13 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":12,"Date":"14 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":13,"Date":"15 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""},{"ID":14,"Date":"16 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""}]'),
+	speakerType : [{id: "Keynote Speaker", event_ids : 1, external_id : 1}, {id: "Author", event_ids : 1, external_id : 2}],
+	themes 		: [{id: 1, name: "CHI", icon : "", active : "", focus : "",summary : "", hero : "", vertical_tile : "", short_name : "", description : "", color : "", external_id : ""}]
+};

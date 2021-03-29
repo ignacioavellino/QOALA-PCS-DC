@@ -12,11 +12,12 @@ class DQP {
       qoala : undefined,
       pcs : [],
       final : {
-        contents     : [],
-        sessions     : [],
-        people       : [],
-        timeSlots    : [],
-        contentTypes : []
+        contents      : [],
+        sessions      : [],
+        people        : [],
+        timeSlots     : [],
+        contentTypes  : [],
+        tracks        : []
       },
       dc : {
         days          : undefined,
@@ -31,8 +32,31 @@ class DQP {
       timeSlots     : [],
       contentTypes  : [],
       people        : [],
-      content       : []
+      contents      : [],
+      dc            : {}
     };
+
+    this.dateFormatterDCDay = new Intl.DateTimeFormat('en', {
+      // hour: '2-digit',
+      // minute: '2-digit',
+      // second: '2-digit',
+      // year: 'numeric',
+      // month: '2-digit',
+      day: '2-digit',
+      timeZone: 'GMT',
+      //hour12: false,
+      hourCycle: "h23"
+      // hour12 false gives 24:00 instead of 00:00, so don't use it
+      // timeZoneName: 'short'
+    });
+
+    this.dateFormatterDCTime = new Intl.DateTimeFormat('en', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'GMT',
+      hourCycle: "h23"
+      // hour12: false,
+    });
 
     this.presenterMatch = [];
 
@@ -64,7 +88,7 @@ class DQP {
         videos              : this.programs.qoala.contents[c].videos,
         authors             : this.programs.qoala.contents[c].authors,
         typeId              : this.programs.qoala.contents[c].typeId,
-
+        trackId             : this.programs.qoala.contents[c].trackId,
         // sessionOne          : undefined;
         // sessionTwo          : undefined;
         // sessionThree        : undefined;
@@ -90,16 +114,22 @@ class DQP {
     this.programs.final.people         = this.programs.qoala.people;
     this.programs.final.timeSlots      = this.programs.qoala.timeSlots;
     this.programs.final.contentTypes   = this.programs.qoala.contentTypes;
+    this.programs.final.tracks         = this.programs.qoala.tracks;
+    
 
     // ********************
     // 3. Add Session information to program content
     // ********************
-    // Make dictionary
+    // Make dictionaries
     for (var i = 0; i < this.programs.final.timeSlots.length; i++) {
       this.dictionaries.timeSlots[this.programs.final.timeSlots[i].id] = {
         startDate   : this.programs.final.timeSlots[i].startDate,
         endDate     : this.programs.final.timeSlots[i].endDate
       }
+    }
+
+    for (var idx in this.programs.final.contents) {
+      this.dictionaries.contents[this.programs.final.contents[idx].id] = this.programs.final.contents[idx];
     }
 
     // For each session
@@ -243,34 +273,6 @@ class DQP {
     }
 
     return result;
-
-      /*
-      var similarities = [];
-    for (var authIdx in content.authors) {
-      // Compute which author is the most similar
-      var fullName = this.dictionaries.people[content.authors[authIdx].personId].firstName +
-       " " + this.dictionaries.people[content.authors[authIdx].personId].middleInitial +
-       " " + this.dictionaries.people[content.authors[authIdx].personId].lastName;
-      var sim = this._similarity( content.presenter.pCSStr, fullName);
-
-      if (sim > threshold) {
-        similarities.push({
-          //idxProgFinal  : idxProgFinal,
-          //pCSStr        : content.presenter.pCSStr,
-          //authIdx       : authIdx,
-          qOALAPersonId : this.dictionaries.people[content.authors[authIdx].personId].id,
-          //name          : this.dictionaries.people[content.authors[authIdx].personId].firstName + this.dictionaries.people[content.authors[authIdx].personId].lastName
-        });
-      }
-    }
-
-    if (similarities.length == 1) {
-      // Array of presenters with one item
-      content.presenters = [{ personId : similarities[0].qOALAPersonId }];
-    } else {
-      console.log("Similarities", idxProgFinal, similarities.length);
-    }
-      */
   }
 
   processPresenterDataForReview() {
@@ -318,48 +320,27 @@ class DQP {
 
   processDCData(ignores) {
     var i;
-    // ********************
-    // 1. Prepare Venues (= QOALA rooms)
-    // ********************
-    this.programs.dc.venues = [];
-    this.programs.dc.venuesDict = [];
-    i = 1;
-    for (var idx in this.programs.qoala.rooms) {
-      var room = this.programs.qoala.rooms[idx];
-
-      var objToPush = {
-        id                : i,
-        name              : room.name,
-        capacity          : 0,
-        reserved_capacity : 0,
-        level_id          : 0,
-        map_venue_id      : 0,
-        event_id          : 0,
-        external_id       : room.id
-      };
-      this.programs.dc.venues.push(objToPush);
-      this.programs.dc.venuesDict[room.id] = objToPush;
-      i++;
-    }
 
     // ********************
-    // 2. Prepar talk-types (=QOALA tracks)
+    // 1. Prepare talk-types (=QOALA tracks)
     // ********************
-    // TODO: ignore a list passed by parameter
     this.programs.dc.talkTypes = [];
     this.programs.dc.talkTypesDict = [];
     i = 1;
-    for (var idx in this.programs.qoala.tracks) {
-      var track = this.programs.qoala.tracks[idx];
+    for (var idx in this.programs.final.tracks) {
+      var track = this.programs.final.tracks[idx];
 
-      // Check if it has a contentTypes that should be ignored
+      // Check if it has a track that should be ignored
       if ( ignores.tracks.includes(track.id) ) {
         continue;
       }
 
-      var printName = track.name.slice( 
-        track.name.indexOf(this.talkTypesExcessBlurb) + this.talkTypesExcessBlurb.length ,
-        track.name.length );
+      var printName = "";
+      if (track.name) {
+        var printName = track.name.slice(
+          track.name.indexOf(this.talkTypesExcessBlurb) + this.talkTypesExcessBlurb.length,
+          track.name.length );
+      }
 
       var objToPush = {
         id                : i,
@@ -375,13 +356,13 @@ class DQP {
     }
 
     // ********************
-    // 3. Prepar session-types (=QOALA contentTypes)
+    // 2. Prepare session-types (=QOALA contentTypes)
     // ********************
     this.programs.dc.sessionTypes = [];
     this.programs.dc.sessionTypesDict = [];
     i = 1;
-    for (var idx in this.programs.qoala.contentTypes) {
-      var contentType = this.programs.qoala.contentTypes[idx];
+    for (var idx in this.programs.final.contentTypes) {
+      var contentType = this.programs.final.contentTypes[idx];
 
       // Check if it has a contentTypes that should be ignored
       if ( ignores.contentTypes.includes(contentType.id) ) {
@@ -398,6 +379,295 @@ class DQP {
       i++;
     }
 
+    // ********************
+    // 3. Prepare venues (= QOALA rooms)
+    // ********************
+    this.programs.dc.venues = [];
+    this.programs.dc.venuesDict = [];
+    i = 1;
+    for (var idx in this.programs.qoala.rooms) {
+      var room = this.programs.qoala.rooms[idx];
+
+      var objToPush = {
+        id                : i,
+        name              : room.name,
+        capacity          : 0,
+        reserved_capacity : 0,
+        level_id          : 0,
+        map_venue_id      : 0,
+        event_id          : 1,
+        external_id       : room.id,
+        sessiontTypeId    : this.programs.dc.sessionTypesDict[room.typeId].id
+      };
+      this.programs.dc.venues.push(objToPush);
+      this.programs.dc.venuesDict[room.id] = objToPush;
+      i++;
+    }
+
+
+    // ********************
+    // 4. Compute Speakers
+    // ********************
+    this.programs.dc.speakers = [];
+    this.programs.dc.speakersDict = [];
+    i = 1;
+    for (var idx in this.programs.final.people) {
+      var person = this.programs.final.people[idx];
+
+      var firstName = person.firstName;
+      if (person.middleInitial && person.middleInitial.length > 0) {
+        firstName += " " + person.middleInitial;
+      }
+
+      var objToPush = {
+        id                    : i,
+        pronoun               : "",
+        first_name            : firstName,
+        last_name             : person.lastName,
+        email                 : "",
+        location              : "SEE INDIVIDUAL TALKS",
+        state                 : "SEE INDIVIDUAL TALKS",
+        country               : "SEE INDIVIDUAL TALKS",
+        contact_number        : "",
+        bio                   : "",
+        company               : "",
+        job_title             : "",
+        company_website       : "",
+        theme_ids             : this.programs.dc.themes[0].id, // One theme by default
+        talk_ids              : "", // will compute later
+        event_ids             : 1, 
+        speaker_type_id       : "CANNOT COMPUTE",
+        featured              : "TRUE",
+        facebook              : "",
+        twitter               : "",
+        linkedin              : "",
+        external_id           : person.id
+      };
+      this.programs.dc.speakers.push(objToPush);
+      this.programs.dc.speakersDict[person.id] = objToPush;
+      i++;
+    }
+
+    // ********************
+    // 5. Prepare talks
+    // ********************
+    this.programs.dc.talks = [];
+    this.programs.dc.talksDict = [];
+
+    // Dictionary for later
+    this.dictionaries.dc.talksBySpeakers = [];
+    i = 1;
+    for (var idx in this.programs.final.contents) {
+      var content = this.programs.final.contents[idx];
+
+      // Compute authors list
+      var authors = [];
+      var j = 1;
+      for (var idy in content.authors) {
+        var personQOALA = this.dictionaries.people[ content.authors[idy].personId ];
+        var fullName = personQOALA.firstName;
+        if (personQOALA.middleInitial && personQOALA.middleInitial.length > 0) {
+          fullName += " " + personQOALA.middleInitial;
+        }
+        fullName += " " + personQOALA.lastName;
+        var affiliation = "";
+
+        authors.push({
+          order         : j
+          speakerId     : this.programs.dc.speakersDict[content.authors[idy].personId].id, // id to table of speaker ids
+          name          : fullName,
+          affiliations  : content.authors[idy].affiliations
+        });
+        j++
+      }
+
+      /*
+      // Compute speakers from presenters
+      var speakers = [];
+      for (var idy in content.presenters) {
+        var personQOALA = this.dictionaries.people[ content.presenters[idy].personId ];
+        if (!personQOALA) {
+          console.log("ERROR. Unknown person when trying to match speaker for content:", content);
+        }
+        var speakerDCId = this.programs.dc.speakersDict[personQOALA.id].id;
+        speakers.push(speakerDCId);
+
+        // Add to dictionaries, for later
+        if (!this.dictionaries.dc.talksBySpeakers[speakerDCId]) {
+          this.dictionaries.dc.talksBySpeakers[speakerDCId] = [i];
+        } else {
+          this.dictionaries.dc.talksBySpeakers[speakerDCId].push(i);
+        }
+      }
+      */
+      // Compute speakers from authors
+      var speakers = [];
+
+      // Check if it has a track that should be ignored
+      if ( ignores.tracks.includes(content.trackId) ) {
+        continue;
+      }
+
+      var objToPush = {
+        id                    : i,
+        title                 : content.title,
+        description           : content.abstract,
+        cover_image           : "",
+        approved              : "",
+        featured              : "",
+        owner_email           : "",
+        venue_id              : "SEE SESSION",
+        day_id                : "SEE SESSION",
+        talk_type_id          : this.programs.dc.talkTypesDict[content.trackId].id,
+        duration              : this.dictionaries.contentTypes[content.typeId].duration, 
+        speaker_ids           : speakers.join(","),
+        speaker_emails        : "",
+        authors               : JSON.stringify(authors),
+        session_ids           : "", // need to link
+        theme_ids             : this.programs.dc.themes[0].id, // One theme by default
+        event_ids             : 1,
+        moderator_id          : "SEE SESSION",
+        publishing_approval   : "",
+        publishing_blocked    : "",
+        webcast_url           : "",
+        eposter_presentation  : "",
+        eposter_url           : "",
+        webcast_poster        : "",
+        time                  : "SEE SESSION",
+        external_id           : content.id
+      };
+
+      this.programs.dc.talks.push(objToPush);
+      this.programs.dc.talksDict[content.id] = objToPush;
+      i++;
+    }
+
+    // ********************
+    // 6. Prepare sessions
+    // ********************
+    this.programs.dc.sessions = [];
+    this.programs.dc.sessionsDict = [];
+
+    // Dictionary for later
+    this.dictionaries.dc.sessionsByTalks = [];
+    
+    i = 1;
+    for (var idx in this.programs.final.sessions) {
+      var session = this.programs.final.sessions[idx];
+
+      // Get day and time data
+      var dcDay = this._matchQOALATimeSlotIdWithDCDayId(session.timeSlotId);
+
+      // Compute moderators (=QOALA chairs)
+      var moderators = [];
+      for (var idy in session.chairIds) {
+        var personQOALA = this.dictionaries.people[ session.chairIds[idy] ];
+        var speakerDCId = this.programs.dc.speakersDict[personQOALA.id].id;
+        moderators.push(speakerDCId);
+      }
+
+      var talks = [];
+      // Compute talks within this session
+      for (var idy in session.contentIds) {
+        var contentQOALA = this.dictionaries.contents[ session.contentIds[idy] ];
+        var talkDCId = this.programs.dc.talksDict[contentQOALA.id].id;
+        talks.push(talkDCId);
+
+        // Add to dictionaries, for later
+        if (!this.dictionaries.dc.sessionsByTalks[talkDCId]) {
+          this.dictionaries.dc.sessionsByTalks[talkDCId] = [i];
+        } else {
+          this.dictionaries.dc.sessionsByTalks[talkDCId].push(i);
+        }
+      }
+
+      var objToPush = {
+        id                    : i,
+        title                 : session.name,
+        description           : "",
+        session_type_id       : this.programs.dc.sessionTypesDict[ session.typeId ].id,
+        event_id              : 1,
+        day_id                : this.programs.dc.days[dcDay.dcDayId].ID,
+        time                  : dcDay.time,
+        duration              : dcDay.duration,
+        background_image      : "",
+        talk_ids              : talks.join(","),
+        moderators_ids        : moderators.join(","),
+        moderators_emails     : "",
+        venue_ids             : this.programs.dc.venuesDict[session.roomId].id,
+        theme_ids             : this.programs.dc.themes[0].id, // One theme by default
+        registration_required : "",
+        bookable              : "",
+        booking_start_date    : "",
+        booking_end_date      : "",
+        featured              : "",
+        active                : "TRUE",
+        completed             : "TRUE",
+        external_id           : session.id,
+        epochTimeStart        : this.dictionaries.timeSlots[session.timeSlotId].startDate,
+        epochTimeEnd          : this.dictionaries.timeSlots[session.timeSlotId].endDate
+      };
+      this.programs.dc.sessions.push(objToPush);
+      this.programs.dc.sessionsDict[contentType.id] = objToPush;
+      i++;
+    }
+
+    // ********************
+    // 7. Add sessions to talks
+    // ********************
+    for (var idx in this.programs.dc.talks) {
+      var talks = this.dictionaries.dc.sessionsByTalks[ this.programs.dc.talks[idx].id ];
+      if (!talks) {
+        // Some sessions have no content, like breaks
+        // console.log("No talk stored in dict", this.programs.dc.talks[idx]);
+      } else {
+        this.programs.dc.talks[idx].session_ids = talks.join(", ")
+      }
+    }
+
+    // ********************
+    // 8. Add talks to speakers
+    // ********************
+    // TODO: This is wrong, it links to authors, but should link to presenters
+    // for (var idx in this.programs.dc.speakers) {
+    //   var speakers = this.dictionaries.dc.talksBySpeakers[ this.programs.dc.speakers[idx].id ];
+    //   if (!speakers) {
+    //     // Some people don't give talks, like co-authors
+    //   } else {
+    //     this.programs.dc.speakers[idx].talk_ids = speakers.join(", ")
+    //   }
+    // }
+
+  }
+
+  _matchQOALATimeSlotIdWithDCDayId(timeSlotId) {
+    var dateQOALAStart = new Date( this.dictionaries.timeSlots[timeSlotId].startDate );
+
+    // Get in GMT
+    var dateQOALAStartDay = this.dateFormatterDCDay.format(dateQOALAStart);
+    var dateQOALAStartTime = this.dateFormatterDCTime.format(dateQOALAStart);
+
+    var match = undefined;
+
+    for (var idx in this.programs.dc.days) {
+      var dayDC = this.programs.dc.days[idx].Date.slice(0, 2) ;
+      if (dateQOALAStartDay == dayDC) {
+        match = idx;
+        break;
+      }
+    }
+
+    if (!match) {
+      console.log("WARNING - No day match");
+      debugger;
+    }
+
+    // For duration: end - start is in milliseconds, so multiply by 1000 for seconds, then by 60 for minutes
+    return {
+      dcDayId   : match,
+      time      : dateQOALAStartTime,
+      duration  : (this.dictionaries.timeSlots[timeSlotId].endDate - this.dictionaries.timeSlots[timeSlotId].startDate) / 1000 / 60
+    };
   }
 
   
