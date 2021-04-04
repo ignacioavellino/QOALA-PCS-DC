@@ -54,15 +54,18 @@
 		<input id="file-input-pcs" type="file" multiple>
 
 		<h1>Step 3: merge data</h1>
+		
+		<button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button>
+
 		<table border=1>
 			<tr>
-				<th>Merge data</th>
+				<th>Session Room Spread</th>
 				<th>People</th>
 				<th>Session Chairs</th>
 			</tr>
 			<tr>
-				<td><button id="button-merge" disabled onclick="mergeDataSources();">Merge Data Sources</button></td>
-				<td>Match PCS Presenter with QOALA People for review: <button id="button-match-presenting" disabled onclick="matchPresentingAuthors();">Match Presentiers-People</button></td>
+				<td>Load file and spread sessions into new rooms: <input id="file-input-session-spread" type="file"> </td>
+				<td>Match PCS Presenter with QOALA People for review: <button id="button-match-presenting" disabled onclick="matchPresentingAuthors();">Match Presenters-People</button></td>
 				<td>Load file and match for review: <input id="file-input-session-chairs" type="file"> </td>
 			</tr>
 			<tr>

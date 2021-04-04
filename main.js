@@ -23,6 +23,10 @@ window.addEventListener("load", function() {
 	const inputFilePeopleQOALA = document.getElementById("file-input-people-extra");
 	inputFilePeopleQOALA.addEventListener("change", loadFilePeopleQOALA, false);
 
+	const inputFileSessionSpread = document.getElementById("file-input-session-spread");
+	inputFileSessionSpread.addEventListener("change", loadFileSessionSpread, false);
+	
+
 	
 
 	dqp = new DQP();
@@ -284,8 +288,96 @@ function loadFileDataDC() {
 	        		contentTypes 		 : [11772, 11764]
 	        	});*/
 	        	dqp.processDCData({
-	        		tracks 			: [],
-	        		contentTypes 	: []
+	        		tracksToRename 	: [{
+	        			idQOALA 	: 11154,
+	        			name 		: "Break 20 min"
+	        		}, {
+	        			idQOALA 	: 11156,
+	        			name 		: "Break 5 min"
+	        		}, {
+	        			idQOALA 	: 11157,
+	        			name 		: "Opening"
+	        		}, {
+	        			idQOALA 	: 11153,
+	        			name 		: "SigCHI Lifetime Awards"
+	        		}, {
+	        			idQOALA 	: 11158,
+	        			name 		: "Keynote Q&A (short)"
+	        		}, {
+	        			idQOALA 	: 11159,
+	        			name 		: "Keynote Q&A (long)"
+	        		}, {
+	        			idQOALA 	: 11155,
+	        			name 		: "Break 10 min"
+	        		}, {
+	        			idQOALA 	: 11164,
+	        			name 		: "Keynotes"
+	        		}, {
+	        			idQOALA 	: 11160,
+	        			name 		: "alt.chi debate"
+	        		}, {
+	        			idQOALA 	: 11166,
+	        			name 		: "Student Game Competition Q&A"
+	        		}, {
+	        			idQOALA 	: 11165,
+	        			name 		: "Student Game Competition Closing"
+	        		}, {
+	        			idQOALA 	: 11167,
+	        			name 		: "Student Game Competition Opening"
+	        		}],
+	        		contentTypesToRename 	: [{
+	        			idQOALA 	: 11765,
+	        			name 		: "SigCHI Award"
+	        		}, {
+	        			idQOALA 	: 11766,
+	        			name 		: "SigCHI Lifetime Award"
+	        		}, {
+	        			idQOALA 	: 11768,
+	        			name 		: "Keynote Q&A (long)"
+	        		}, {
+	        			idQOALA 	: 11769,
+	        			name 		: "Opening and Live Q&A"
+	        		}, {
+	        			idQOALA 	: 11771,
+	        			name 		: "Break 5 min"
+	        		}, {
+	        			idQOALA 	: 11772,
+	        			name 		: "Break 20 min"
+	        		}, {
+	        			idQOALA 	: 11773,
+	        			name 		: "alt.chi debate"
+	        		}, {
+	        			idQOALA 	: 11774,
+	        			name 		: "Student Game Competition Opening & Closing"
+	        		}, {
+	        			idQOALA 	: 11775,
+	        			name 		: "Student Game Competition Q&A"
+	        		}, {
+	        			idQOALA 	: 11762,
+	        			name 		: "Student Research Competition"
+	        		}, {
+	        			idQOALA 	: 11763,
+	        			name 		: "Student Game Competition"
+	        		}, {
+	        			idQOALA 	: 11764,
+	        			name 		: "Break 10 min"
+	        		}],
+	        		roomsToRename : [{
+	        			idQOALA 	: 10476,
+	        			name 		: "SRC 1st-Round Room 1"
+	        		}, {
+	        			idQOALA 	: 10463,
+	        			name 		: "Late-Breaking Work Room 1"
+	        		}, {
+	        			idQOALA 	: 10462,
+	        			name 		: "Interactivity Room 1"
+	        		}, {
+	        			idQOALA 	: 10480,
+	        			name 		: "Doctoral Consortium Poster 1"
+	        		}, {
+	        			idQOALA 	: 10471,
+	        			name 		: "Workshop Room 1"
+	        		}]
 	        	});
 
 	        	console.log("Finished processing DC Data");
@@ -299,7 +391,7 @@ function loadFileDataDC() {
 }
 
 function loadFilePeopleQOALA() {
-	console.log("Loading Extra QOALA People Information");
+	console.log("Loading extra QOALA People information");
 
 	const files = document.getElementById("file-input-people-extra").files;
 
@@ -312,18 +404,60 @@ function loadFilePeopleQOALA() {
         try {
         	var jsonPeopleExtraInfo = CSVJSON.csv2json(event.target.result, {parseNumbers: true});
         	
-        	console.log("Loaded People extra information Content entries:", jsonPeopleExtraInfo.length);
+        	console.log("Loaded People extra information. Content entries:", jsonPeopleExtraInfo.length);
 
         	// Add info to people
-        	dqp.processPeopleExtraInformation( jsonPeopleExtraInfo, ["email"] );
+        	dqp.processPeopleExtraInformation( jsonPeopleExtraInfo, [
+        		{name: "email", type: "text"},
+        		{name: "pronnouns_match_by_email", type: "text"},
+        		{name: "pronnouns_match_by_full_name", type: "text"},
+        		{name: "pronnouns_match_overall", type: "text"},
 
-        	console.log("Finished processing extra info people");
+        		{name: "affiliation_match_by_email", type: "text"},
+        		{name: "affiliation_match_by_full_name", type: "text"},
+        		{name: "affiliation_match_overall", type: "text"},
+
+        		//{name: "Content related institutions", type: "json"},
+        		{name: "Content related affiliations", type: "json" }
+        	]);
+
+        	console.log("Finished processing extra QOALA people information");
 	    	
 	    } catch (error) {
 	    	console.error(error);
 	    }
     };
     reader.readAsText(files[0]);
+}
+
+function loadFileSessionSpread() {
+
+	console.log("Loading extra QOALA People information");
+
+	const files = document.getElementById("file-input-session-spread").files;
+
+	var reader = new FileReader();
+	// Keep ref to name
+	reader.fileName = files[0].name;
+
+    reader.onload = function(event) {
+        console.log("Done reading file", event.target.fileName);
+        try {
+        	var jsonSessionSpread = CSVJSON.csv2json(event.target.result, {parseNumbers: true});
+        	
+        	console.log("Loaded session spread info. Content entries:", jsonSessionSpread.length);
+
+        	// Add session spread
+        	dqp.setSessionSpread( jsonSessionSpread );
+
+        	console.log("Finished processing session spread");
+	    	
+	    } catch (error) {
+	    	console.error(error);
+	    }
+    };
+    reader.readAsText(files[0]);
+
 }
 
 function exportResultCSV() {
@@ -338,7 +472,7 @@ function exportResultCSV() {
 
 
 let dataDC = {
-	days 		: [{"ID":5,"Date":"07 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":6,"Date":"08 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":7,"Date":"09 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":8,"Date":"10 May 2021","Start Time":"7:55 AM","End Time":"7:55 AM","Created At":"23 March 2021 7:55 AM","Updated At":"23 March 2021 7:55 AM","Actions":""},{"ID":9,"Date":"11 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":10,"Date":"12 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":11,"Date":"13 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":12,"Date":"14 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"23 March 2021 7:56 AM","Updated At":"23 March 2021 7:56 AM","Actions":""},{"ID":13,"Date":"15 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""},{"ID":14,"Date":"16 May 2021","Start Time":"7:56 AM","End Time":"7:56 AM","Created At":"26 March 2021 7:25 PM","Updated At":"26 March 2021 7:25 PM","Actions":""}],
-	speakerType : [{id: "Keynote Speaker", event_ids : 1, external_id : 1}, {id: "Author", event_ids : 1, external_id : 2}],
+	days 		: [{"id":1,"date":"07 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":2,"date":"08 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":3,"date":"09 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":4,"date":"10 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":5,"date":"11 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":6,"date":"12 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":7,"date":"13 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":8,"date":"14 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":9,"date":"15 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":10,"date":"16 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"}],
+	speakerType : [{id: "Keynote", event_ids : 1, external_id : 1}, {id: "Author", event_ids : 1, external_id : 2}, {id: "Session Chair", event_ids : 1, external_id : 3},],
 	themes 		: [{id: 1, name: "CHI", icon : "", active : "", focus : "",summary : "", hero : "", vertical_tile : "", short_name : "", description : "", color : "", external_id : ""}]
 };
