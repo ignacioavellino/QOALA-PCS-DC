@@ -26,9 +26,6 @@ window.addEventListener("load", function() {
 	const inputFileSessionSpread = document.getElementById("file-input-session-spread");
 	inputFileSessionSpread.addEventListener("change", loadFileSessionSpread, false);
 	
-
-	
-
 	dqp = new DQP();
 
 	// Load dev QOALA data
@@ -171,7 +168,7 @@ function mergeDataSources() {
 
 	console.log("Data source merge end");
 
-	var button = document.getElementById("button-export");
+	var button = document.getElementById("button-export-all");
 	button.removeAttribute("disabled");
 }
 
@@ -460,9 +457,9 @@ function loadFileSessionSpread() {
 
 }
 
-function exportResultCSV() {
-	dqp.exportFinalProgram();
-	var stringToExport = CSVJSON.json2csv(dqp.programs.toExport);
+function exportResultCSVAll() {
+	var res = dqp.exportProgramAll();
+	var stringToExport = CSVJSON.json2csv(res);
 	
 	var blob = new Blob([stringToExport], {
 	    type: "text/plain;charset=utf-8;",
@@ -470,6 +467,35 @@ function exportResultCSV() {
 	saveAs(blob, "result_v" + dqp.programs.qoala.dataVersion + ".csv");
 }
 
+function exportResultCSVAuthors() {
+	var progByAuthors = dqp.getProgramByAuthors(
+		//Papers, Alt Chi, Journals and Case Studies // - contentTypes
+		//[11305, 11759, 11748, 11299] 
+		[11066, 11069, 11077, 11076]// - tracks
+	);
+	var stringToExport = CSVJSON.json2csv(progByAuthors);
+	
+	var blob = new Blob([stringToExport], {
+	    type: "text/plain;charset=utf-8;",
+	});
+	saveAs(blob, "programByAuthors_v" + dqp.programs.qoala.dataVersion + ".csv");
+}
+
+function exportResultCSVSessionChairs() {
+
+	var progBySessionChairs = dqp.getProgramBySessionChairs(
+		//Papers, Alt Chi, Journals and Case Studies // - contentTypes
+		[11305, 11759, 11748, 11299]  // - types
+		//[11066, 11069, 11077, 11076]// - tracks
+	);
+	var stringToExport = CSVJSON.json2csv(progBySessionChairs);
+	
+	var blob = new Blob([stringToExport], {
+	    type: "text/plain;charset=utf-8;",
+	});
+	saveAs(blob, "programBySessionChairs_v" + dqp.programs.qoala.dataVersion + ".csv");
+
+}
 
 let dataDC = {
 	days 		: [{"id":1,"date":"07 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":2,"date":"08 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":3,"date":"09 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":4,"date":"10 May 2021","start_time":"7:55 AM","end_time":"7:55 AM"},{"id":5,"date":"11 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":6,"date":"12 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":7,"date":"13 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":8,"date":"14 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":9,"date":"15 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"},{"id":10,"date":"16 May 2021","start_time":"7:56 AM","end_time":"7:56 AM"}],

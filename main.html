@@ -88,7 +88,11 @@
 				<th></th>
 			</tr>
 			<tr>
-				<td><button id="button-export" disabled onclick="exportResultCSV();">Export CSV for EE</button></td>
+				<td>
+					<button id="button-export-all" disabled onclick="exportResultCSVAll();">Export EE - CSV with all</button>
+					<button id="button-export-authors"  onclick="exportResultCSVAuthors();">Export EE - CSV by authors</button>
+					<button id="button-export-sessions"  onclick="exportResultCSVSessionChairs();">Export EE - CSV by sessions</button>
+				</td>
 				<td>Import files: days.csv, <input id="file-input-dc" multiple type="file"></td>
 				<td></td>
 			</tr>
